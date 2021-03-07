@@ -25,8 +25,8 @@ public class Main {
             blockchain = (Blockchain) SerializationUtils.deserialize(blockchainFile.getName());
             if (blockchain.isValidated()) {
                 blockchain.printBlockchain();
-                /*List<Miner> minerList = createMiners(blockchain);
-                createNRead(blockchain, minerList);*/
+                List<Miner> minerList = createMiners(blockchain);
+                createNRead(blockchain, minerList);
             } else {
                 System.out.println("Blockchain not valid");
             }
@@ -45,7 +45,7 @@ public class Main {
                 .collect(Collectors.toList());
     }
 
-    
+
     private static void createNRead(Blockchain blockchain, List<Miner> miners) throws Exception {
         GenerateKeys gk = new GenerateKeys(1024);
         for (int i = 0; i < 3; i++) {
@@ -62,6 +62,7 @@ public class Main {
             blockchain.addData(msg);
 
             ExecutorService executor = Executors.newFixedThreadPool(miners.size());
+            System.out.println("Generating new block...");
             miners.forEach(miner -> {
                 miner.setBlock(block);
                 executor.submit(miner);
@@ -70,5 +71,6 @@ public class Main {
             executor.shutdown();
             executor.awaitTermination(5, TimeUnit.SECONDS);
         }
+        System.out.println("Done!");
     }
 }

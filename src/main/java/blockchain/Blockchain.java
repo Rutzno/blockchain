@@ -13,10 +13,12 @@ import java.util.List;
 
 public class Blockchain implements Serializable {
 
-    private static final long serialVersionUID = 1234L;
+    private static final long serialVersionUID = 12345L;
 
     private transient static final String fileName = "blockchain.data";
-    public transient static final List<Message> datas = new ArrayList<>();
+    public transient static final List<Message> streamMessages = new ArrayList<>();
+    public transient static final List<Message> savedMessages = new ArrayList<>();
+//    public transient static final List<Message> datas = new ArrayList<>();
     private final List<Block> blocks;
     private int difficulty;
 
@@ -53,6 +55,8 @@ public class Blockchain implements Serializable {
     public void addBlock(Block block) {
         if (isBlockValidated(getLastBlock(), block)) {
             blocks.add(block);
+            savedMessages.clear();
+            savedMessages.addAll(streamMessages);
             regulateNumberN();
             try {
                 SerializationUtils.serialize(this, fileName);
@@ -87,7 +91,10 @@ public class Blockchain implements Serializable {
     }
 
     public void addData(Message data) {
-        datas.add(data);
+        if (streamMessages.equals(savedMessages)) {
+            streamMessages.clear();
+        }
+        streamMessages.add(data);
     }
 
     public long getNewMessageID() {

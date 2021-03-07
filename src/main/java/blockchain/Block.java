@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class Block implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 12L;
     private static final Random random = new Random();
 
     private int miner;
@@ -24,7 +24,7 @@ public class Block implements Serializable {
     private final String previousHash;
     private long magicNumber;
     private String hash;
-    private final List<Message> data;
+    private List<Message> data;
     private long generatingTime;
 
     public Block(int id, String prevHash) {
@@ -70,6 +70,10 @@ public class Block implements Serializable {
         return data;
     }
 
+    public void setData(List<Message> data) {
+        this.data = data;
+    }
+
     /**
      * Generate Hash that start with difficulty zeros (difficulty)
      * @param difficulty
@@ -78,30 +82,29 @@ public class Block implements Serializable {
     public boolean mine(int difficulty) {
         String input;
         String zeros = "0".repeat(difficulty);
-        String resultHash = "";
+        String resultHash;
         int rndNumber;
         do {
             rndNumber = random.nextInt(100000000);
-            input = String.format("%d%d%s%d", id, timestamp, previousHash, rndNumber);
+            input = String.format("%d%d%s%s%d", id, timestamp, previousHash, data, rndNumber);
             resultHash = StringUtil.applySha256(input);
             synchronized (this) {
                 if (hash != null) return false;
             }
         } while (!resultHash.startsWith(zeros));
         hash = resultHash;
-
-        data.addAll(Blockchain.datas);
-        Blockchain.datas.clear();
-
         magicNumber = rndNumber;
         return true;
     }
 
     @Override
     public String toString() {
-        String sbData = data.stream()
-                .map(msg -> "\n" + msg.getData())
-                .collect(Collectors.joining());
+        String sbData = data.isEmpty() ?
+                "no messages" :
+                data.stream()
+                        .map(msg -> "\n" + msg.getData())
+                        .collect(Collectors.joining());
+
         return "Block:\n" +
                 "Created by miner # " + miner +"\n" +
                 "Id: " + id +"\n" +

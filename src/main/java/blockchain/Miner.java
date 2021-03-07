@@ -23,7 +23,7 @@ public class Miner implements Runnable {
         boolean mined;
 
         long startTime = System.currentTimeMillis();
-
+        block.setData(Blockchain.savedMessages);
         mined = block.mine(difficulty);
 
         long endTime = System.currentTimeMillis();
